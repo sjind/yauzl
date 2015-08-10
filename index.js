@@ -95,6 +95,9 @@ function fromRandomAccessReader(reader, totalSize, options, callback) {
       // 12 - Size of central directory (bytes)
       // 16 - Offset of start of central directory, relative to start of archive
       var centralDirectoryOffset = eocdrBuffer.readUInt32LE(16);
+      if (centralDirectoryOffset === 0xffffffff) {
+        return callback(new Error("invalid central directory length"));
+      }
       // 20 - Comment length
       var commentLength = eocdrBuffer.readUInt16LE(20);
       var expectedCommentLength = eocdrBuffer.length - eocdrWithoutCommentSize;

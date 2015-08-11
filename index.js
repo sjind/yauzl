@@ -251,17 +251,24 @@ function readEntries(self) {
         if (headerId === 1) {
           console.log("sj dataSize: "+ dataSize);
           console.log("entry.uncompressedSize " + entry.uncompressedSize + "entry.compressedSize " + entry.compressedSize + "entry.relativeOffsetOfLocalHeader " + entry.relativeOffsetOfLocalHeader);
-          if (dataSize >= 16) {
-            var sjUcSize = extraFieldBuffer.readUIntLE(dataStart,6);
-            var sjCSize = extraFieldBuffer.readUIntLE(dataStart+8,6);
-            var sjOffset = 0;
-            if (entry.relativeOffsetOfLocalHeader === 0xffffffff) {
-              sjOffset = extraFieldBuffer.readUIntLE(dataStart+16,6);
+          if (dataSize >= 8) {
+            var dataCursor = dataStart;
+            if (entry.uncompressedSize === 0xffffffff) {
+              var sjUcSize = extraFieldBuffer.readUIntLE(dataCursor, 6);
+              dataCursor += 8;
+              entry.uncompressedSize = sjUcSize;
             }
-            console.log("sjUcSize " + sjUcSize + "sjCSize " + sjCSize + "sjOffset " + sjOffset);
-            entry.compressedSize = sjCSize;
-            entry.uncompressedSize = sjUcSize;
-            entry.relativeOffsetOfLocalHeader = sjOffset;
+            if (entry.compressedSize === 0xffffffff) {
+              var sjCSize = extraFieldBuffer.readUIntLE(dataCursor, 6);
+              dataCursor += 8;
+              entry.compressedSize = sjCSize;
+            }
+            if (entry.relativeOffsetOfLocalHeader === 0xffffffff) {
+              var sjOffset = extraFieldBuffer.readUIntLE(dataCursor, 6);
+              dataCursor += 8;
+              entry.relativeOffsetOfLocalHeader = sjOffset;
+            }
+            console.log("entry.uncompressedSize " + entry.uncompressedSize + "entry.compressedSize " + entry.compressedSize + "entry.relativeOffsetOfLocalHeader " + entry.relativeOffsetOfLocalHeader);
           }
         }
         extraFieldBuffer.copy(dataBuffer, 0, dataStart, dataEnd);

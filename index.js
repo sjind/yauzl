@@ -250,6 +250,7 @@ function readEntries(self) {
         var dataBuffer = new Buffer(dataSize);
         if (headerId === 1) {
           console.log("sj dataSize: "+ dataSize);
+          console.log("entry.uncompressedSize " + entry.uncompressedSize + "entry.compressedSize " + entry.compressedSize + "entry.relativeOffsetOfLocalHeader " + entry.relativeOffsetOfLocalHeader);
           if (dataSize >= 16) {
             var sjUcSize = extraFieldBuffer.readUIntLE(dataStart,6);
             var sjCSize = extraFieldBuffer.readUIntLE(dataStart+8,6);
@@ -258,7 +259,6 @@ function readEntries(self) {
               sjOffset = extraFieldBuffer.readUIntLE(dataStart+16,6);
             }
             console.log("sjUcSize " + sjUcSize + "sjCSize " + sjCSize + "sjOffset " + sjOffset);
-            console.log("entry.uncompressedSize " + entry.uncompressedSize + "entry.compressedSize " + entry.compressedSize + "entry.relativeOffsetOfLocalHeader " + entry.relativeOffsetOfLocalHeader);
             entry.compressedSize = sjCSize;
             entry.uncompressedSize = sjUcSize;
             entry.relativeOffsetOfLocalHeader = sjOffset;

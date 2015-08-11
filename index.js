@@ -108,7 +108,11 @@ function fromRandomAccessReader(reader, totalSize, options, callback) {
         if (buffer.readUInt32LE(bufferOffsetOfZip64ECD) !== 0x06064b50) {
           return callback(new Error("invalid central directory length 2"));
         }
-        
+       centralDirectoryOffset = buffer.readUIntLE(bufferOffsetOfZip64ECD + 48, 6); 
+       entryCount2 = buffer.readUIntLE(bufferOffsetOfZip64ECD + 32, 6); 
+       console.log("sj: cdoffset " + centralDirectoryOffset);
+       console.log("sj: entryCount " + entryCount);
+       console.log("sj: entryCount2 " + entryCount2);
       }
       // 20 - Comment length
       var commentLength = eocdrBuffer.readUInt16LE(20);
@@ -244,6 +248,22 @@ function readEntries(self) {
         var dataStart = i + 4;
         var dataEnd = dataStart + dataSize;
         var dataBuffer = new Buffer(dataSize);
+        if (headerId === 1) {
+          console.log("sj dataSize: "+ dataSize);
+          if (datasize >= 16) {
+            var sjUcSize = extraFieldBuffer.readUIntLE(dataStart,6);
+            var sjCSize = extraFieldBuffer.readUIntLE(dataStart+8,6);
+            var sjOffset = 0;
+            if (entry.relativeOffsetOfLocalHeader === 0xffffffff) {
+              sjOffset = extraFieldBuffer.readUIntLE(dataStart+16,6);
+            }
+            console.log("sjUcSize " + sjUcSize + "sjCSize " + sjCSize + "sjOffset " + sjOffset);
+            console.log("entry.uncompressedSize " + entry.uncompressedSize + "entry.compressedSize " + entry.compressedSize + "entry.relativeOffsetOfLocalHeader " + entry.relativeOffsetOfLocalHeader);
+            entry.compressedSize = sjCSize;
+            entry.uncompressedSize = sjUcSize;
+            entry.relativeOffsetOfLocalHeader = sjOffset;
+          }
+        }
         extraFieldBuffer.copy(dataBuffer, 0, dataStart, dataEnd);
         entry.extraFields.push({
           id: headerId,

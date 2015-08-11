@@ -96,7 +96,19 @@ function fromRandomAccessReader(reader, totalSize, options, callback) {
       // 16 - Offset of start of central directory, relative to start of archive
       var centralDirectoryOffset = eocdrBuffer.readUInt32LE(16);
       if (centralDirectoryOffset === 0xffffffff) {
-        return callback(new Error("invalid central directory length"));
+        if (buffer.readUInt32LE(i - 20) !== 0x07064b50) {
+          return callback(new Error("invalid central directory length"));
+        }
+        var offsetForZip64EndOfCentralDir = buffer.readUIntLE(i - 12, 6);
+        var sj1 = buffer.readUIntLE(i - 12, 4);
+        var sj2 = buffer.readUIntLE(i - 8, 4);
+        console.log(offsetForZip64EndOfCentralDir + " " + sj1 + " " + sj2);
+        var reverseOffsetZip64ECD = totalSize - offsetForZip64EndOfCentralDir;
+        var bufferOffsetOfZip64ECD = bufferSize - reverseOffsetZip64ECD;
+        if (buffer.readUInt32LE(bufferOffsetOfZip64ECD) !== 0x06064b50) {
+          return callback(new Error("invalid central directory length 2"));
+        }
+        
       }
       // 20 - Comment length
       var commentLength = eocdrBuffer.readUInt16LE(20);

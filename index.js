@@ -250,7 +250,7 @@ function readEntries(self) {
         var dataBuffer = new Buffer(dataSize);
         if (headerId === 1) {
           console.log("sj dataSize: "+ dataSize);
-          if (datasize >= 16) {
+          if (dataSize >= 16) {
             var sjUcSize = extraFieldBuffer.readUIntLE(dataStart,6);
             var sjCSize = extraFieldBuffer.readUIntLE(dataStart+8,6);
             var sjOffset = 0;

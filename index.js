@@ -100,9 +100,8 @@ function fromRandomAccessReader(reader, totalSize, options, callback) {
           return callback(new Error("invalid central directory length"));
         }
         var offsetForZip64EndOfCentralDir = buffer.readUIntLE(i - 12, 6);
-        var sj1 = buffer.readUIntLE(i - 12, 4);
-        var sj2 = buffer.readUIntLE(i - 8, 4);
-        console.log(offsetForZip64EndOfCentralDir + " " + sj1 + " " + sj2);
+        //var sj1 = buffer.readUIntLE(i - 12, 4);
+        //var sj2 = buffer.readUIntLE(i - 8, 4);
         var reverseOffsetZip64ECD = totalSize - offsetForZip64EndOfCentralDir;
         var bufferOffsetOfZip64ECD = bufferSize - reverseOffsetZip64ECD;
         if (buffer.readUInt32LE(bufferOffsetOfZip64ECD) !== 0x06064b50) {
@@ -110,9 +109,6 @@ function fromRandomAccessReader(reader, totalSize, options, callback) {
         }
        centralDirectoryOffset = buffer.readUIntLE(bufferOffsetOfZip64ECD + 48, 6); 
        entryCount2 = buffer.readUIntLE(bufferOffsetOfZip64ECD + 32, 6); 
-       console.log("sj: cdoffset " + centralDirectoryOffset);
-       console.log("sj: entryCount " + entryCount);
-       console.log("sj: entryCount2 " + entryCount2);
       }
       // 20 - Comment length
       var commentLength = eocdrBuffer.readUInt16LE(20);
@@ -249,8 +245,6 @@ function readEntries(self) {
         var dataEnd = dataStart + dataSize;
         var dataBuffer = new Buffer(dataSize);
         if (headerId === 1) {
-          console.log("sj dataSize: "+ dataSize);
-          console.log("entry.uncompressedSize " + entry.uncompressedSize + "entry.compressedSize " + entry.compressedSize + "entry.relativeOffsetOfLocalHeader " + entry.relativeOffsetOfLocalHeader);
           if (dataSize >= 8) {
             var dataCursor = dataStart;
             if (entry.uncompressedSize === 0xffffffff) {
@@ -268,7 +262,6 @@ function readEntries(self) {
               dataCursor += 8;
               entry.relativeOffsetOfLocalHeader = sjOffset;
             }
-            console.log("entry.uncompressedSize " + entry.uncompressedSize + "entry.compressedSize " + entry.compressedSize + "entry.relativeOffsetOfLocalHeader " + entry.relativeOffsetOfLocalHeader);
           }
         }
         extraFieldBuffer.copy(dataBuffer, 0, dataStart, dataEnd);
